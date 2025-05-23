@@ -20,6 +20,12 @@ Finally, a majority voting was taken among the outputs of all the classifiers wh
 
 * Run **audio_model.py** for this system
 
+# System S2
+
+* We fine-tune the **SALMONN-13B** model for this task. Please refer to [https://github.com/bytedance/SALMONN] for understanding and settung up this code.
+* You just have to download the SALMONN-13B file, the BEATS tokenizer and change the corresponding paths for running the **train_podcast.py** file.
+* The test results will be automatically saved as a csv file.
+
 # System T1
 
 * For this go into the **T1** folder, change the path of the files in the **test_dict.json** file to your own test files.
