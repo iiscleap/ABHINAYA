@@ -8,10 +8,10 @@ The leaderboard is available at [https://lab-msp.com/MSP-Podcast_Competition/IS2
 
 Our system consisted of an ensemble of 5 different classifiers
 
-* A speech only model - WavLM - trained with weighted focal loss
-* A speech LLM - SALMONN13B - trained with weighted focal loss
-* A fine-tuned text-only LLM - LLaMA 3.1 8B - trained with vector scaling (VS) loss
-* A zero-shot text-only LLM - LLaMA 3.3 70B
-* A speech LLM adapted for speech-text joint modeling - SALMONN 7B - trained with vector scaling (VS) loss
+* S1: A speech only model - WavLM - trained with weighted focal loss
+* S2: A speech LLM - SALMONN13B - trained with weighted focal loss
+* T1: A zero-shot text-only LLM - LLaMA 3.3 70B
+* T2: A fine-tuned text-only LLM - LLaMA 3.1 8B - trained with vector scaling (VS) loss
+* ST1: A speech LLM adapted for speech-text joint modeling - SALMONN 7B - trained with vector scaling (VS) loss
 
 Finally, a majority voting was taken among the outputs of all the classifiers which resulted in **44.02%** macro-F1 score
