@@ -15,3 +15,11 @@ Our system consisted of an ensemble of 5 different classifiers
 * ST1: A speech LLM adapted for speech-text joint modeling - SALMONN 7B - trained with vector scaling (VS) loss
 
 Finally, a majority voting was taken among the outputs of all the classifiers which resulted in **44.02%** macro-F1 score
+
+# System T1
+
+* For this go into the **T1** folder, change the path of the files in the **test_dict.json** file to your own test files.
+* Run **get_whisper_asr.py** to get the transcripts for the test files.
+* Get an account in the Together platform [https://www.together.ai/models/llama-3-3-70b] (or run it locally) and get the labels for the test files.
+
+
