@@ -16,6 +16,10 @@ Our system consisted of an ensemble of 5 different classifiers
 
 Finally, a majority voting was taken among the outputs of all the classifiers which resulted in **44.02%** macro-F1 score
 
+# System S1
+
+* Run **audio_model.py** for this system
+
 # System T1
 
 * For this go into the **T1** folder, change the path of the files in the **test_dict.json** file to your own test files.
