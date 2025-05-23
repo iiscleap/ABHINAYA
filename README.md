@@ -22,4 +22,12 @@ Finally, a majority voting was taken among the outputs of all the classifiers wh
 * Run **get_whisper_asr.py** to get the transcripts for the test files.
 * Get an account in the Together platform [https://www.together.ai/models/llama-3-3-70b] (or run it locally) and get the labels for the test files.
 
+# System T2
+
+* The transcripts for the train and balanced validation sets are already provided: **train_new_dict.json** and **valid_new_dict.json**.
+* The test transcripts from the **Step 2** of **System T1** are to be used for the inference part of the code.
+* This part requires CUDA 12 or higher to run
+
+
+
 
