@@ -1,2 +1,17 @@
 # ABHINAYA
-Code and models for the paper ABHINAYA - A System for Speech Emotion Recognition In Naturalistic Conditions Challenge
+
+This is the repository for our submission to the **Speech Emotion Recognition in Naturalistic Conditions Challenge** held at **Interspeech 2025**. We ranked **4th** out of **166** teams in the categorical task. However, one of our models were not fully trained within the challenge deadline. Upon completion, our system ranked **1st** in the challenge.
+
+The leaderboard is available at [https://lab-msp.com/MSP-Podcast_Competition/IS2025/]
+
+# System Description
+
+Our system consisted of an ensemble of 5 different classifiers
+
+* A speech only model - WavLM - trained with weighted focal loss
+* A speech LLM - SALMONN13B - trained with weighted focal loss
+* A fine-tuned text-only LLM - LLaMA 3.1 8B - trained with vector scaling (VS) loss
+* A zero-shot text-only LLM - LLaMA 3.3 70B
+* A speech LLM adapted for speech-text joint modeling - SALMONN 7B - trained with vector scaling (VS) loss
+
+Finally, a majority voting was taken among the outputs of all the classifiers which resulted in **44.02%** macro-F1 score
