@@ -38,6 +38,11 @@ Finally, a majority voting was taken among the outputs of all the classifiers wh
 * The test transcripts from the **Step 2** of **System T1** are to be used for the inference part of the code.
 * This part requires CUDA 12 or higher to run
 
+### System ST1
+
+* As in the case of **System S2**, download the SALMONN-7B model and chnage in the **config.py** file accordingly.
+* Run **train_podcast_salmonn.py** for getting the test output in this case
+
 
 
 
