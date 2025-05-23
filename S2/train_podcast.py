@@ -234,17 +234,9 @@ class EmotionClassifier(nn.Module):
         self.salmonn_model = salmonn_model
         self.out = nn.Linear(hidden_dim, output_dim)
         self.fc = nn.Linear(4096*2, hidden_dim)
-        # self.fc1 = nn.Linear(4096, 1024)
-        # self.attenpool = SelfAttentionPooling(4096)
         self.pool = AttentiveStatisticsPooling(4096)
-        # self.rnn = nn.GRU(1024,
-        #                   512,
-        #                   num_layers = 2,
-        #                   bidirectional = True,
-        #                   batch_first = True,
-        #                   dropout = 0.2)
         self.ln = nn.LayerNorm(4096)
-        # self.ln1 = nn.LayerNorm(1024)
+
 
         self.relu = nn.ReLU()
         self.dropout = nn.Dropout(0.5)
@@ -252,7 +244,7 @@ class EmotionClassifier(nn.Module):
     def get_features(self, samples):
 
         feats_final = self.salmonn_model(samples)["hidden_states"][-1, :, :, :]
-        # feats_final = self.fc1(feats_final)
+
         feats_final = self.ln(feats_final)
 
         return feats_final
@@ -263,18 +255,11 @@ class EmotionClassifier(nn.Module):
         samples["task"] = ["emotion_recognition"]*audio.shape[0]
 
         feats_final = self.salmonn_model(samples)["hidden_states"][-1, :, :, :]
-        # feats_final = self.fc1(feats_final)
         feats_final = self.ln(feats_final)
-        # feats_final = self.dropout(self.relu(feats_final))
-        # print(feats_final)
-        # print(feats_final.shape, samples["padding_mask"].shape)
         feat = self.pool(feats_final, ~samples["padding_mask"])
-        # feat = self.attenpool(feats_final)
+
         feat = self.dropout(self.relu(self.fc(feat)))
-        # feat = self.fc(feat)
-        # feat = self.ln(feat)
-        # feat = self.relu(feat)
-        # feat = self.dropout(feat)
+        
         output = self.out(feat)
         
         return output
@@ -371,18 +356,16 @@ def train():
     val_loader = create_dataset("val", 8)
     num_classes = 8
     class_weights = torch.tensor([1.25, 3.125, 6.25, 6.25, 0.5, 0.28, 1.38, 3.125]).to(device)
-    # class_numbers = np.array([6728, 6303, 16712, 2948, 1120, 1432, 2495, 29239])
     class_numbers = np.array([6728, 2495, 1432, 1120, 16712, 29239, 6303, 2948])
-    # class_numbers_tensor = np.array(class_numbers)
+
     alpha = 1.0
     gamma = 2.0
     criterion = WeightedFocalLoss(alpha=alpha, gamma=gamma, weight=class_weights)
     criterion_nowt = WeightedFocalLoss(alpha=alpha, gamma=gamma)
-    # criterion = VSLoss(class_numbers, weight=class_weights)
     
     salmonn_model = SALMONN.from_config(cfg.config.model)
     model = EmotionClassifier(salmonn_model, 1024, num_classes)
-    # model.load_state_dict(torch.load("salmonn_podcast.pth"), strict=False)
+
     model.to(device)
     params = [p for p in model.parameters() if p.requires_grad]
     base_lr = 1e-5
@@ -453,7 +436,6 @@ def train():
                     # delete parameters that do not require gradient
                     del state_dict[k]
             torch.save(state_dict, "salmonn_podcast_7b.pth")
-            # torch.save(model.state_dict(), "model_with_lora.pth")
             final_val_loss = val_f1
         train_loss = tot_loss/len(train_loader)
         train_f1 = f1_score(gt_tr, pred_tr, average='macro')
@@ -467,33 +449,6 @@ def train():
                     Validation Loss {val_loss_log},\
                     Validation Accuracy {val_f1}")
         
-# def test():
-
-#     val_loader = create_dataset("val", 1)
-#     num_classes = 8
-    
-
-#     salmonn_model = SALMONN.from_config(cfg.config.model)
-#     model = EmotionClassifier(salmonn_model, 1024, num_classes)
-#     model.load_state_dict(torch.load("salmonn_podcast_statpool.pth"), strict=False)
-#     model.to(device)
-#     model.eval()
-#     pred_test, gt_test = [], []
-#     with torch.no_grad():
-#         for i, data in enumerate(tqdm(val_loader)):
-#             aud, spectrogram, labels, padding_mask = data["raw_wav"].to(device), data["spectrogram"].to(device), data["labels"].to(device), data["padding_mask"].to(device)
-#             samples = {"spectrogram": spectrogram,"raw_wav": aud,"padding_mask": padding_mask}
-#             with torch.cuda.amp.autocast(enabled=True):
-#                 test_out = model(samples, aud)
-#             pred = torch.argmax(test_out, dim = 1)
-#             pred = pred.detach().cpu().numpy()
-#             pred = list(pred)
-#             pred_test.extend(pred)
-#             labels = labels.detach().cpu().numpy()
-#             labels = list(labels)
-#             gt_test.extend(labels)
-#     test_f1 = f1_score(gt_test, pred_test, average='macro')
-#     logger.info(f"Test Accuracy {test_f1}")
 
 def test():
     test_loader = create_dataset("test", 1)
@@ -525,50 +480,7 @@ def test():
     df.to_csv("salmonn_statpool_test.csv", index=False)
 
 
-def get_features():
-    num_classes = 8
-    salmonn_model = SALMONN.from_config(cfg.config.model)
-    model = EmotionClassifier(salmonn_model, 1024, num_classes)
-    model.load_state_dict(torch.load("salmonn_podcast_drop.pth"), strict=False)
-    model.to(device)
-    model.eval()
-
-    folder = "/data1/soumyad/IS2025_challenge/MSP_PODCAST/Audios"
-    wav_files = os.listdir(folder)
-    wav_files = [x for x in wav_files if ".wav" in x]
-    os.makedirs("audio_features_ft", exist_ok=True)
-    for i, wav_name in enumerate(tqdm(wav_files)):
-        f = os.path.join(folder, wav_name)
-        if i % 3 != 0:
-            continue
-        out_file = os.path.join("audio_features_ft", f.split(os.sep)[-1].replace(".wav", ".npy"))
-        if os.path.exists(out_file):
-            continue
-        wav_processor = WhisperFeatureExtractor.from_pretrained(cfg.config.model.whisper_path)
-        audio, sr = sf.read(f)
-        sr = 16000
-        if len(audio.shape) == 2: # stereo to mono
-            audio = audio[:, 0]
-        if len(audio) < sr: # pad audio to at least 1s
-            sil = np.zeros(sr - len(audio), dtype=float)
-            audio = np.concatenate((audio, sil), axis=0)
-        audio = audio[: sr * 30]
-        spectrogram = wav_processor(audio, sampling_rate=sr, return_tensors="pt")["input_features"]
-        spectrogram = spectrogram.to(args_model.device)
-        audio = torch.from_numpy(audio).to(args_model.device)
-        samples = {"spectrogram": spectrogram,"raw_wav": audio.unsqueeze(0),"padding_mask": torch.zeros(len(audio), dtype=torch.bool).unsqueeze(0).to(args_model.device)}
-        # speech_embeds, speech_atts = model.encode_speech(spectrogram, raw_wav=audio.unsqueeze(0))
-        samples["text"] = ["Describe emotion of the speaker in one word"]
-        samples["task"] = ["emotion_recognition"]
-        with torch.cuda.amp.autocast(enabled=True):
-            hidden_states = model.get_features(samples)
-        # print(hidden_states.shape)
-        feat = hidden_states[0, :, :]
-        np.save(out_file, feat.cpu().detach().numpy())
-
-
 
 if __name__ == "__main__":
     train()
-    # get_features()
-    # test()
+    test()
